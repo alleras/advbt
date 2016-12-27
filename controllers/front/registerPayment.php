@@ -23,9 +23,10 @@ class AdvancedBankTransferRegisterPaymentModuleFrontController extends ModuleFro
     $this->setTemplate('module:advancedbanktransfer/views/templates/front/registerPayment.tpl');
   }
 
+  // Procesa el formulario en registerPayment.tpl
   public function postProcess()
   {
-      if (Tools::isSubmit('submitPayment')){
+      if (Tools::isSubmit('submitPayment')){ // submitPayment se describe en el botón de enviar
         echo "hola";
       }
   }
