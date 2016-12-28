@@ -23,6 +23,7 @@
 		</table>
   </div>
   <div class="panel-footer">
+    <a class="btn btn-default pull-right" href="">
       <i class="process-icon-plus"></i> {l s='Add new' mod='advancedbanktransfer'}
     </a>
   </div>
