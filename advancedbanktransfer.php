@@ -7,6 +7,8 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 class AdvancedBankTransfer extends PaymentModule {
 
+  public $tabs = array();
+
   public function __construct() {
     $this->name = 'advancedbanktransfer';
     $this->tab = 'payments_gateway';
@@ -17,6 +19,17 @@ class AdvancedBankTransfer extends PaymentModule {
     $this->bootstrap = true;
 
     $this->controllers = array('registerPayment');
+
+    $this->tabs[] = array(
+        'name'      => $this->l('Advanced Bank Transfer Settings'),
+        'className' => 'AdminABTSettings',
+        'active'    => 1,
+    );
+    $this->tabs[] = array(
+        'name'      => $this->l('Pending Transfers'),
+        'className' => 'AdminABTPendingTransfers',
+        'active'    => 1,
+    );
 
     parent::__construct();
 
@@ -33,24 +46,72 @@ class AdvancedBankTransfer extends PaymentModule {
     if (!parent::install() ||
       !$this->registerHook('hookPaymentOptions') ||
       !$this->registerHook('hookPaymentReturn') ||
-      !$this->registerHook('displayCustomerAccount')
-    )
+      !$this->registerHook('displayCustomerAccount') ||
+      !$this->addTab($this->tabs, 55))
       return false;
     return true;
   }
+
   public function uninstall() {
-    if (!parent::uninstall())
+    if (!parent::uninstall() ||
+        !$this->removeTab($this->tabs))
       return false;
     return true;
   }
-  public function displayForm() {
+
+  public function addTab($tabs, $id_parent = 0){
+      foreach ($tabs as $tab)
+      {
+          $tabModel             = new Tab();
+          $tabModel->module     = $this->name;
+          $tabModel->active     = $tab['active'];
+          $tabModel->class_name = $tab['className'];
+          $tabModel->id_parent  = $id_parent;
+
+          //tab text in each language
+          foreach (Language::getLanguages(true) as $lang)
+          {
+              $tabModel->name[$lang['id_lang']] = $tab['name'];
+          }
+
+          $tabModel->add();
+
+          //submenus of the tab
+          if (isset($tab['childs']) && is_array($tab['childs']))
+          {
+              $this->addTab($tab['childs'], Tab::getIdFromClassName($tab['className']));
+          }
+      }
+      return true;
+  }
+
+  private function removeTab($tabs){
+      foreach ($tabs as $tab)
+      {
+          $id_tab = (int) Tab::getIdFromClassName($tab["className"]);
+          if ($id_tab)
+          {
+              $tabModel = new Tab($id_tab);
+              $tabModel->delete();
+          }
+
+          if (isset($tab["childs"]) && is_array($tab["childs"]))
+          {
+              $this->removeTab($tab["childs"]);
+          }
+      }
+
+      return true;
+  }
+
+  /*public function displayBankForm() {
       // Get default language
       $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
       // Init Fields form array
       $fields_form[0]['form'] = array(
           'legend' => array(
-              'title' => $this->l('Settings'),
+              'title' => $this->l('Create new'),
           ),
           'input' => array(
               array(
@@ -85,7 +146,14 @@ class AdvancedBankTransfer extends PaymentModule {
           'submit' => array(
               'title' => $this->l('Save'),
               'class' => 'btn btn-default pull-right'
-          )
+          ),
+          'buttons' => array(
+            array(
+              'href' => AdminController::$currentIndex.'&configure='.$this->name.'&token='.Tools::getAdminTokenLite('AdminModules'),
+              'title' => $this->l('Back to list'),
+              'icon' => 'process-icon-back',
+            ),
+          ),
       );
 
       $helper = new HelperForm();
@@ -100,24 +168,6 @@ class AdvancedBankTransfer extends PaymentModule {
       $helper->default_form_language = $default_lang;
       $helper->allow_employee_form_lang = $default_lang;
 
-      // Title and toolbar
-      $helper->title = $this->displayName;
-      $helper->show_toolbar = true;        // false -> remove toolbar
-      $helper->toolbar_scroll = true;      // yes - > Toolbar is always visible on the top of the screen.
-      $helper->submit_action = 'submit'.$this->name;
-      $helper->toolbar_btn = array(
-          'save' =>
-          array(
-              'desc' => $this->l('Save'),
-              'href' => AdminController::$currentIndex.'&configure='.$this->name.'&save'.$this->name.
-              '&token='.Tools::getAdminTokenLite('AdminModules'),
-          ),
-          'back' => array(
-              'href' => AdminController::$currentIndex.'&token='.Tools::getAdminTokenLite('AdminModules'),
-              'desc' => $this->l('Back to list')
-          )
-      );
-
       // Load current value
       $helper->fields_value['BANK_NAME'] = Configuration::get('BANK_NAME');
       $helper->fields_value['BANK_ACCOUNT_NUMBER'] = Configuration::get('BANK_ACCOUNT_NUMBER');
@@ -126,9 +176,19 @@ class AdvancedBankTransfer extends PaymentModule {
 
 
       return $helper->generateForm($fields_form);
-  }
-  public function getContent() {
+  }*/
+
+  /*public function getContent() {
       $output = null;
+
+      $this->context->smarty->assign(
+        array(
+          'current_url' => $this->context->link->getAdminLink('AdminModules').'&configure='.$this->name,
+        )
+      );
+      if(Tools::getValue('add_new_bank')){
+        return $this->addNewBank();
+      }
 
       if (Tools::isSubmit('submit'.$this->name))
       {
@@ -155,15 +215,15 @@ class AdvancedBankTransfer extends PaymentModule {
               $output .= $this->displayConfirmation($this->l('Settings updated'));
           }
       }
-      return $output.$this->displayForm();
-  }
+      return $this->display(__FILE__, 'views/templates/admin/view.tpl');
+  }*/
 
   public function hookPaymentOptions() {
-
+    // todo
   }
 
   public function hookPaymentReturn() {
-
+    // todo
   }
 
   public function hookDisplayCustomerAccount($params) {
