@@ -7,6 +7,7 @@ use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 class AdvancedBankTransfer extends PaymentModule {
 
+  public $models = array('bankModel');
   public $tabs = array();
 
   public function __construct() {
@@ -47,18 +48,47 @@ class AdvancedBankTransfer extends PaymentModule {
       !$this->registerHook('hookPaymentOptions') ||
       !$this->registerHook('hookPaymentReturn') ||
       !$this->registerHook('displayCustomerAccount') ||
-      !$this->addTab($this->tabs, 55))
+      !$this->addTab($this->tabs, 55) ||
+      !$this->installDB())
       return false;
     return true;
   }
 
   public function uninstall() {
     if (!parent::uninstall() ||
-        !$this->removeTab($this->tabs))
+        !$this->removeTab($this->tabs) ||
+        !$this->uninstallDB())
       return false;
     return true;
   }
+  // Database
+  public function installDB()
+  {
+      $return = true;
+      $return &= Db::getInstance()->execute('
+              CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'advancedbanktransfer_banks` (
+              `id_bank` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+              `name` VARCHAR(255) NOT NULL,
+              `holder` VARCHAR(255) NOT NULL,
+              `enabled` INT NOT NULL,
+              `info` TEXT NOT NULL,
+              PRIMARY KEY (`id_bank`)
+          ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;'
+      );
+      return $return;
+  }
 
+  public function uninstallDB($drop_table = true)
+  {
+      $ret = true;
+      if ($drop_table) {
+          $ret &=  Db::getInstance()->execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'advancedbanktransfer_banks`');
+      }
+
+      return $ret;
+  }
+
+  // Misc
   public function addTab($tabs, $id_parent = 0){
       foreach ($tabs as $tab)
       {
@@ -102,6 +132,16 @@ class AdvancedBankTransfer extends PaymentModule {
       }
 
       return true;
+  }
+
+  public function abtControllerTemplate($context, string $fileLocation, $content){
+    $smarty = $context->smarty;
+    $addContent = $smarty->fetch(_PS_MODULE_DIR_ . 'advancedbanktransfer/views/templates/'.$fileLocation);
+    $this->context->smarty->assign(
+      array(
+        'content' => $content . $addContent
+      )
+    );
   }
 
   /*public function displayBankForm() {
@@ -217,7 +257,8 @@ class AdvancedBankTransfer extends PaymentModule {
       }
       return $this->display(__FILE__, 'views/templates/admin/view.tpl');
   }*/
-
+  
+  // Hooks
   public function hookPaymentOptions() {
     // todo
   }

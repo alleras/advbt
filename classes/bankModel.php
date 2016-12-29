@@ -1,11 +1,21 @@
 <?php
-class paymentMethods extends ObjectModel {
+
+
+class bankModel extends ObjectModel {
+
+  public $id_bank;
+  public $name;
+  public $holder;
+  public $enabled;
+  public $info;
+
   public static $definition = array(
       'table' => 'advancedbanktransfer_banks',
       'primary' => 'id_bank',
       'multilang' => true,
       'fields' => array(
         // Normal fields
+        'id_bank' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
         'name' => array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'size' => 255),
         'holder' => array('type' => self::TYPE_STRING, 'validate' => 'isString', 'size' => 255),
         'enabled' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),

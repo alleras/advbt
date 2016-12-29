@@ -5,7 +5,7 @@ class AdminABTSettingsController extends ModuleAdminController {
 
   public $module;
   public $ssl = true;
-  
+
   public function __construct(){
     $this->bootstrap  = true;
     $this->module = new AdvancedBankTransfer;
@@ -15,11 +15,67 @@ class AdminABTSettingsController extends ModuleAdminController {
     $this->context = Context::getContext();
   }
 
+  private function initBankList(){
+    $this->fields_list = array(
+        'id_bank' => array(
+          'title' => $this->l('ID'),
+            'width' => 140,
+            'type' => 'text',
+        ),
+        'name' => array(
+            'title' => $this->l('Name'),
+            'width' => 140,
+            'type' => 'text',
+        ),
+    );
+
+    $helper = new HelperList();
+
+    $helper->bulk_actions = array(
+        'delete' => array(
+            'text'    => $this->l('Delete'),
+            'icon'    => 'icon-trash',
+            'confirm' => $this->l('Delete selected items?'),
+        ),
+    );
+
+    $helper->shopLinkType = '';
+
+    $this->addRowAction('details');
+
+    $helper->simple_header = true; // INTENTAR LUEGO HACER UN SORTING/SEARCH
+    // Actions to be displayed in the "Actions" column
+    $helper->actions = array('edit', 'delete');
+
+    $helper->identifier = 'id_bank';
+    $helper->show_toolbar = true;
+    $helper->title = '<i class="icon-university"></i> '.$this->l('Available Banks for Transfers/Deposits').' <span class="badge">qty</span>';
+    $helper->table = $this->module->name.'_bank';
+
+    $helper->token = Tools::getAdminTokenLite('AdminABTSettings');
+    $helper->currentIndex = AdminController::$currentIndex;
+
+    $result = array(
+      array(
+        'id_category' => '1',
+        'name' => 'Agustin',
+      ),
+      array(
+        'id_category' => '2',
+        'name' => 'Pedro',
+      ),
+      array(
+        'id_category' => '3',
+        'name' => 'Agustin',
+      ),
+    );
+
+    return $helper->generateList($result, $this->fields_list);
+  }
+
   public function initContent(){
     parent::initContent();
 
-    $smarty = $this->context->smarty;
-    $content = $smarty->fetch(_PS_MODULE_DIR_ . 'advancedbanktransfer/views/templates/admin/view.tpl');
-    $this->context->smarty->assign(array('content' => $this->content . $content));
+    $this->module->abtControllerTemplate($this->context,'admin/view.tpl', $this->initBankList().$this->content);
   }
 }
