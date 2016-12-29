@@ -2,7 +2,7 @@
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
+require_once _PS_MODULE_DIR_.'advancedbanktransfer/classes/bankModel.php';
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 class AdvancedBankTransfer extends PaymentModule {
@@ -49,7 +49,8 @@ class AdvancedBankTransfer extends PaymentModule {
       !$this->registerHook('hookPaymentReturn') ||
       !$this->registerHook('displayCustomerAccount') ||
       !$this->addTab($this->tabs, 55) ||
-      !$this->installDB())
+      !$this->installDB() ||
+      !$this->createDummy())
       return false;
     return true;
   }
@@ -134,16 +135,28 @@ class AdvancedBankTransfer extends PaymentModule {
       return true;
   }
 
-  public function abtControllerTemplate($context, string $fileLocation, $content){
+  public function abtControllerTemplate($context, $content, string $fileLocation = null){
     $smarty = $context->smarty;
-    $addContent = $smarty->fetch(_PS_MODULE_DIR_ . 'advancedbanktransfer/views/templates/'.$fileLocation);
+    $addContent = '';
+
+    if(isset($fileLocation))
+      $addContent = $smarty->fetch(_PS_MODULE_DIR_ . 'advancedbanktransfer/views/templates/'.$fileLocation);
+
     $this->context->smarty->assign(
       array(
         'content' => $content . $addContent
       )
     );
+    return true;
   }
+    $model = new bankModel;
 
+    $model->name = 'Dummy Bank';
+    $model->holder = 'Agustin Lleras';
+    $model->enabled = 1;
+    $model->info = 'Extra information';
+
+    $model->add();
   /*public function displayBankForm() {
       // Get default language
       $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
@@ -257,7 +270,7 @@ class AdvancedBankTransfer extends PaymentModule {
       }
       return $this->display(__FILE__, 'views/templates/admin/view.tpl');
   }*/
-  
+
   // Hooks
   public function hookPaymentOptions() {
     // todo

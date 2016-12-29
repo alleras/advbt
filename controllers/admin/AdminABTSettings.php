@@ -55,20 +55,8 @@ class AdminABTSettingsController extends ModuleAdminController {
     $helper->token = Tools::getAdminTokenLite('AdminABTSettings');
     $helper->currentIndex = AdminController::$currentIndex;
 
-    $result = array(
-      array(
-        'id_category' => '1',
-        'name' => 'Agustin',
-      ),
-      array(
-        'id_category' => '2',
-        'name' => 'Pedro',
-      ),
-      array(
-        'id_category' => '3',
-        'name' => 'Agustin',
-      ),
-    );
+    $model = new bankModel;
+    $result = $model->getBanks('id_bank', 'asc');
 
     return $helper->generateList($result, $this->fields_list);
   }
@@ -76,6 +64,6 @@ class AdminABTSettingsController extends ModuleAdminController {
   public function initContent(){
     parent::initContent();
 
-    $this->module->abtControllerTemplate($this->context,'admin/view.tpl', $this->initBankList().$this->content);
+    $this->module->abtControllerTemplate($this->context, $this->initBankList().$this->content);
   }
 }

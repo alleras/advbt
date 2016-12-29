@@ -28,6 +28,21 @@ class bankModel extends ObjectModel {
       return parent::__construct($id, $id_lang);
   }
 
+  public function getBanks(string $orderBy = 'id_bank', string $orderType = null){
+    $sql = new DbQuery();
+    $sql->select('*');
+    $sql->from('advancedbanktransfer_banks');
+
+    if($orderType)
+      $orderBy = $orderBy.' '.$orderType;
+
+    if($orderBy != 'id_bank')
+      $sql->orderBy($orderBy);
+    else
+      $sql->orderBy('id_bank'.$orderType);
+
+    return Db::getInstance()->executeS($sql);
+  }
   public function addBank(){
     return true;
   }
