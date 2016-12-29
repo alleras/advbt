@@ -149,6 +149,7 @@ class AdvancedBankTransfer extends PaymentModule {
     );
     return true;
   }
+  /*public function createDummy(){
     $model = new bankModel;
 
     $model->name = 'Dummy Bank';
@@ -157,6 +158,7 @@ class AdvancedBankTransfer extends PaymentModule {
     $model->info = 'Extra information';
 
     $model->add();
+  }*/
   /*public function displayBankForm() {
       // Get default language
       $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
