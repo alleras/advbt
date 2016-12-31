@@ -106,6 +106,27 @@ class AdminABTSettingsController extends ModuleAdminController {
                   'size' => 300,
                   'required' => false
               ),
+              array(
+                  'type' => 'switch',
+                  'label' => $this->l('Display the invitation to pay in the order confirmation page'),
+                  'name' => 'BANK_ENABLED',
+                  'is_bool' => true,
+                  'hint' => $this->l('Your country\'s legislation may require you to send the invitation ' .
+                      'to pay by email only. Disabling the option will hide the invitation ' .
+                      'on the confirmation page.'),
+                  'values' => array(
+                      array(
+                          'id' => 'active_on',
+                          'value' => true,
+                          'label' => $this->l('Enabled'),
+                      ),
+                      array(
+                          'id' => 'active_off',
+                          'value' => false,
+                          'label' => $this->l('Disabled'),
+                      )
+                  ),
+              ),
           ),
           'submit' => array(
               'title' => $this->l('Save'),
@@ -143,6 +164,7 @@ class AdminABTSettingsController extends ModuleAdminController {
 
       $helper->fields_value['BANK_ID'] = $bankData['id_bank'];
       $helper->fields_value['BANK_NAME'] = $bankData['name'];
+      $helper->fields_value['BANK_ENABLED'] = $bankData['enabled'] ?? true;
       $helper->fields_value['BANK_ACCOUNT_NUMBER'] = $bankData['number'];
       $helper->fields_value['BANK_ACCOUNT_HOLDER'] = $bankData['holder'];
       $helper->fields_value['ADDITIONAL_INFO'] = $bankData['info'];
@@ -173,6 +195,7 @@ class AdminABTSettingsController extends ModuleAdminController {
         'bankName' => strval(Tools::getValue('BANK_NAME')),
         'bankAccountNumber' => strval(Tools::getValue('BANK_ACCOUNT_NUMBER')),
         'bankAccountHolder' => strval(Tools::getValue('BANK_ACCOUNT_HOLDER')),
+        'bankEnabled' => Tools::getValue('BANK_ENABLED'),
         'additional' => strval(Tools::getValue('ADDITIONAL_INFO')),
       );
       // Antes que nada, se validan los datos
@@ -196,7 +219,7 @@ class AdminABTSettingsController extends ModuleAdminController {
           $model->name = $formBankData['bankName'];
           $model->number = $formBankData['bankAccountNumber'];
           $model->holder = $formBankData['bankAccountHolder'];
-          $model->enabled = 1;
+          $model->enabled = $formBankData['bankEnabled'];
           $model->info = $formBankData['additional'];
 
           $model->add();
@@ -213,7 +236,7 @@ class AdminABTSettingsController extends ModuleAdminController {
           $model->name = $formBankData['bankName'];
           $model->number = $formBankData['bankAccountNumber'];
           $model->holder = $formBankData['bankAccountHolder'];
-          $model->enabled = 1; // CAMBIAR
+          $model->enabled = $formBankData['bankEnabled'];
           $model->info = $formBankData['additional'];
 
           $model->update();
