@@ -103,17 +103,16 @@ class AdminABTSettingsController extends ModuleAdminController {
                   'type' => 'textarea',
                   'label' => $this->l('Additional Info'),
                   'name' => 'ADDITIONAL_INFO',
+                  'hint' => $this->l('Any information that is missing in the fields above can be put in here.'),
                   'size' => 300,
                   'required' => false
               ),
               array(
                   'type' => 'switch',
-                  'label' => $this->l('Display the invitation to pay in the order confirmation page'),
+                  'label' => $this->l('Active?'),
                   'name' => 'BANK_ENABLED',
                   'is_bool' => true,
-                  'hint' => $this->l('Your country\'s legislation may require you to send the invitation ' .
-                      'to pay by email only. Disabling the option will hide the invitation ' .
-                      'on the confirmation page.'),
+                  'hint' => $this->l('If it\'s disabled, this bank will not show up in the order confirmation.'),
                   'values' => array(
                       array(
                           'id' => 'active_on',

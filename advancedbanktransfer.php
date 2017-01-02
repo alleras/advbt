@@ -47,8 +47,8 @@ class AdvancedBankTransfer extends PaymentModule {
       Shop::setContext(Shop::CONTEXT_ALL);
 
     if (!parent::install() ||
-      !$this->registerHook('hookPaymentOptions') ||
-      !$this->registerHook('hookPaymentReturn') ||
+      !$this->registerHook('paymentOptions') ||
+      !$this->registerHook('paymentReturn') ||
       !$this->registerHook('displayCustomerAccount') ||
       !$this->addTab($this->tabs, 55) ||
       !$model->installDB())
@@ -134,12 +134,53 @@ class AdvancedBankTransfer extends PaymentModule {
   }
 
   // Hooks
-  public function hookPaymentOptions() {
-    // todo
+  public function hookPaymentOptions($params)
+  {
+      if (!$this->active) {
+          return;
+      }
+
+      $newOption = new PaymentOption();
+
+      $newOption->setCallToActionText($this->trans('Pay by transfer or deposit', array(), 'Modules.AdvancedBankTransfer.Shop'))
+                ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true))
+                ->setAdditionalInformation('hey'/*$this->fetch('module:ps_wirepayment/views/templates/hook/ps_wirepayment_intro.tpl')*/);
+      $payment_options = [
+          $newOption,
+      ];
+
+      return $payment_options;
   }
 
-  public function hookPaymentReturn() {
-    // todo
+
+  public function hookPaymentReturn($params) {
+    if (!$this->active) {
+        return;
+    }
+    $state = $params['order']->getCurrentState();
+
+    $model = new bankModel;
+
+    $banks = $model->getBanks();
+
+    $this->smarty->assign(array(
+        'banks' => $banks,
+        'shop_name' => $this->context->shop->name,
+        'total' => Tools::displayPrice(
+            $params['order']->getOrdersTotalPaid(),
+            new Currency($params['order']->id_currency),
+            false
+          ),
+        'status' => 'ok',
+        'reference' => $params['order']->reference,
+        'contact_url' => $this->context->link->getPageLink('contact', true)
+    ));
+
+    return $this->fetch('module:advancedbanktransfer/views/templates/hook/payment_return.tpl');
+  }
+
+  public function hookDisplayOrderDetail(){
+
   }
 
   public function hookDisplayCustomerAccount($params) {
